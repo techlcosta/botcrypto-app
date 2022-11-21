@@ -1,0 +1,8 @@
+node_modules
+build
+dist
+vite.config.ts
+out
+.webpack
+.vscode
+*.js
