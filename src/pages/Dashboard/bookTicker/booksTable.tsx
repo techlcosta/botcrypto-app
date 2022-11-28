@@ -1,4 +1,4 @@
-import { BookOrderInterface, SymbolsInterface } from '../dashboard'
+import { BookOrderInterface, SymbolsInterface } from '../../../shared/types'
 import { BooksRow } from './booksRow'
 
 interface TableProps {

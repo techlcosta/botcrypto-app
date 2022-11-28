@@ -1,5 +1,4 @@
-
-import { MarketTickerInterface, SymbolsInterface } from '../dashboard'
+import { MarketTickerInterface, SymbolsInterface } from '../../../shared/types'
 import { TickersRow } from './tickersRow'
 
 interface TableProps {

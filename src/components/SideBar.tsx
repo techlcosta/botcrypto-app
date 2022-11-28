@@ -48,7 +48,7 @@ const NavButon = function ({ title, to, icon, isOpen, ...props }: SideBarNavButt
     <li className='h-12 mt-2' {...props} >
       <NavLink
         to={to}
-        className='h-full w-full no-underline rounded-md text-stone-500 dark:text-gray-300 font-medium hover:text-gray-50 flex items-center transition-colors duration-300 hover:bg-violet-500 [&.active]:bg-violet-500 '
+        className='h-full w-full no-underline rounded-md text-stone-500 dark:text-gray-300 font-medium hover:text-gray-50 flex items-center transition-colors duration-300 hover:bg-violet-500 [&.active]:bg-violet-500 border-2 border-transparent outline-none focus-visible:border-violet-600 '
       >
         <i className='h-full w-14 min-w-[56px] flex justify-center items-center'>{icon}</i>
         <span className={`h-full flex items-center text-xl transition-all duration-700 ${isOpen ? '' : 'duration-75 hidden'}`}> {title}</span>

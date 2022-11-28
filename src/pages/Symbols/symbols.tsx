@@ -1,28 +1,19 @@
 import { ArrowsClockwise } from 'phosphor-react'
 import React, { useEffect, useState } from 'react'
+import { toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 import { Box } from '../../components/Box'
 import { Button } from '../../components/Button'
 import { SelectQuote } from '../../components/SelectQuote'
 import { usePersistedState } from '../../hooks/usePersistState'
 import { getSymbols, syncSymbols } from '../../services/api.servives'
+import { SymbolsInterface } from '../../shared/types'
 import { SymbolsTableBody } from './symbolsTableBody'
-
-export interface SymbolsInterface {
-  id: string
-  symbol: string
-  basePrecision: number
-  quotePrecision: number
-  minNotional: string
-  minLotSize: string
-  isFavorite: boolean
-  updatedAt: Date
-  createdAt: Date
-}
 
 export function SymbolsPage () {
   const [symbols, setSymbols] = useState<SymbolsInterface[]>([])
   const [isSyncing, setSyncing] = useState<boolean>(false)
-  const [defaultQuote, setDefaultQuote] = usePersistedState<string>('BOTCRYPTO_QUOTE_SYMBOLS', 'FAVORITES')
+  const [defaultQuote, setDefaultQuote] = usePersistedState<string>('BOTCRYPTO_QUOTE_SYMBOLS', 'BNB')
 
   async function handleGetSymbols (): Promise<void> {
     const response = await getSymbols()
@@ -40,12 +31,19 @@ export function SymbolsPage () {
 
   async function handleSync (): Promise<void> {
     setSyncing(true)
+    try {
+      await syncSymbols()
 
-    await syncSymbols()
+      await handleGetSymbols()
 
-    await handleGetSymbols()
+      toast.success('Success!')
 
-    setSyncing(false)
+      setSyncing(false)
+    } catch (error) {
+      toast.error('Update failed!')
+
+      setSyncing(false)
+    }
   }
 
   function handleSelect (event: React.ChangeEvent<HTMLSelectElement>) {

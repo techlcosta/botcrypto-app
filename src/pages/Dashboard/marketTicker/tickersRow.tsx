@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { MarketTickerInterface } from '../dashboard'
+import { MarketTickerInterface } from '../../../shared/types'
 
 interface MarketTickerStateInterface {
   close: string

@@ -1,4 +1,5 @@
-import { SymbolsInterface } from './symbols'
+
+import { SymbolsInterface } from '../../shared/types'
 import { SymbolsTableRow } from './symbolsTableRow'
 
 interface TableProps {

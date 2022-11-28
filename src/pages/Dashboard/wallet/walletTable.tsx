@@ -1,35 +1,7 @@
-import { useEffect, useState } from 'react'
-import { getBalance } from '../../../services/api.servives'
-import { BalanceInterface } from '../dashboard'
+import { WalletProps } from '../../../shared/types'
 import { WalletRow } from './walletRow'
 
-export interface WalletRowProps {
-  symbol: string
-  available: string
-  onOrder: string
-}
-
-export function WalletTable ({ balanceStream }: { balanceStream: BalanceInterface }) {
-  const [balance, setBalance] = useState<WalletRowProps[]>([])
-
-  useEffect(() => {
-    getBalance()
-      .then(response => {
-        if (response.data) {
-          const balanceWallet = Object.entries(response.data as BalanceInterface).map(([key, value]) => {
-            return {
-              symbol: key,
-              available: value.available,
-              onOrder: value.onOrder
-            }
-          })
-
-          setBalance([...balanceWallet])
-        }
-      })
-      .catch(err => console.log(err))
-  }, [balanceStream])
-
+export function WalletTable ({ walletBalance }: { walletBalance: WalletProps[] }) {
   return (
     <table className='w-full border-separate border-spacing-y-3 mb-4'>
       <thead className='bg-black font-russo uppercase text-xl sticky top-0 z-10'>
@@ -40,7 +12,7 @@ export function WalletTable ({ balanceStream }: { balanceStream: BalanceInterfac
         </tr>
       </thead>
       <tbody>
-        {balance.map(item => {
+        {walletBalance.map(item => {
           return (
             <WalletRow key={item.symbol} Row={item}/>
           )

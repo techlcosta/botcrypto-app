@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { BookOrderInterface } from '../dashboard'
+import { BookOrderInterface } from '../../../shared/types'
 
 interface BookOrderStateInterface {
   updateId?: number

@@ -1,4 +1,4 @@
-import { Link, LockKeyOpen, Password, User } from 'phosphor-react'
+import { FloppyDisk, Link, LockKeyOpen, Password, User } from 'phosphor-react'
 import React, { useEffect, useState } from 'react'
 import { Box } from '../../components/Box'
 import { Button } from '../../components/Button'
@@ -147,6 +147,7 @@ export function SettingsPage () {
 
           <Button type='submit' width='w-fit'>
             <span> Save</span>
+            <FloppyDisk size={20} weight={'fill'} />
           </Button>
         </form>
       </Box>

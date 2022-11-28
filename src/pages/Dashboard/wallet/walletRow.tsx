@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
-import { WalletRowProps } from './walletTable'
+import { WalletProps } from '../../../shared/types'
 
-export function WalletRow ({ Row }: { Row: WalletRowProps }) {
+export function WalletRow ({ Row }: { Row: WalletProps }) {
   const tickersRow = useMemo(() => {
     return (
       <tr className='bg-slate-800 hover:opacity-70'>

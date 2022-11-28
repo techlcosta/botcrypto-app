@@ -1,56 +1,18 @@
+import { CreditCard } from 'phosphor-react'
 import { useContext, useEffect, useState } from 'react'
 import useWebSocket from 'react-use-websocket'
 import { Box } from '../../components/Box'
+import { Button } from '../../components/Button'
+import { NewOrderModal } from '../../components/NewOrderModal'
 import { SelectQuote } from '../../components/SelectQuote'
 import { AuthContext } from '../../context/authContext'
 import { usePersistedState } from '../../hooks/usePersistState'
-import { getSymbols } from '../../services/api.servives'
+import { getBalance, getSymbols } from '../../services/api.servives'
+import { BalanceInterface, BookOrderInterface, MarketTickerInterface, SymbolsInterface, WalletProps } from '../../shared/types'
 import { BooksTable } from './bookTicker/booksTable'
 import { CandleChart } from './candleChart/candleChart'
 import { TickersTable } from './marketTicker/tickersTable'
 import { WalletTable } from './wallet/walletTable'
-
-export interface SymbolsInterface {
-  id: string
-  symbol: string
-  basePrecision: number
-  quotePrecision: number
-  minNotional: string
-  minLotSize: string
-  isFavorite: boolean
-  updatedAt: Date
-  createdAt: Date
-}
-
-export interface MarketTickerInterface {
-  [key: string]: {
-    close: string
-    eventTime: string
-    high: string
-    low: string
-    open: string
-    quoteVolume: string
-    volume: string
-  }
-}
-
-export interface BookOrderInterface {
-  [key: string]: {
-    updateId: number
-    symbol: string
-    bestBid: string
-    bestBidQty: string
-    bestAsk: string
-    bestAskQty: string
-  }
-}
-
-export interface BalanceInterface {
-  [key: string]: {
-    available: string
-    onOrder: string
-  }
-}
 
 interface LastJsonMessageInterface {
   market: MarketTickerInterface
@@ -71,6 +33,7 @@ export function DashboardPage () {
   const [balance, setBalance] = useState<BalanceInterface>({})
   const [tickers, setTickers] = useState<MarketTickerInterface>({})
   const [symbols, setSymbols] = useState<SymbolsInterface[]>([])
+  const [wallet, setWallet] = useState<WalletProps[]>([])
   const [defaultQuote, setDefaultQuote] = usePersistedState<string>('BOTCRYPTO_QUOTE_DASHBOARD', 'FAVORITES')
 
   const { lastJsonMessage } = useWebSocket(import.meta.env.VITE_APP_WS_URL, {
@@ -84,7 +47,6 @@ export function DashboardPage () {
         if (market) setTickers(market)
 
         if (book) {
-          console.log(book)
           book.forEach(item => { books[item.symbol] = item })
           setBooks(books)
         }
@@ -101,30 +63,49 @@ export function DashboardPage () {
     setDefaultQuote(value)
   }
 
-  async function handleGetSymbols (): Promise<void> {
-    const response = await getSymbols()
+  useEffect(() => {
+    getSymbols().then(response => {
+      const symbols = response.data.filter((symbol: SymbolsInterface) => {
+        if (defaultQuote === 'FAVORITES') {
+          return symbol.isFavorite
+        } else {
+          return symbol.symbol.endsWith(defaultQuote)
+        }
+      })
 
-    const symbols = response.data.filter((symbol: SymbolsInterface) => {
-      if (defaultQuote === 'FAVORITES') {
-        return symbol.isFavorite
-      } else {
-        return symbol.symbol.endsWith(defaultQuote)
-      }
+      setSymbols(symbols)
     })
-
-    setSymbols(symbols)
-  }
+      .catch(err => console.log(err))
+  }, [defaultQuote])
 
   useEffect(() => {
-    handleGetSymbols().catch(err => console.log(err))
-  }, [defaultQuote])
+    getBalance()
+      .then(response => {
+        if (response.data) {
+          const balanceWallet = Object.entries(response.data as BalanceInterface).map(([key, value]) => {
+            return {
+              symbol: key,
+              available: value.available,
+              onOrder: value.onOrder
+            }
+          })
+          setWallet([...balanceWallet])
+        }
+      })
+      .catch(err => console.log(err))
+  }, [balance])
 
   return (
     <main className='px-8 pb-4 w-screen h-full flex flex-col gap-6 overflow-auto'>
       <Box mt='sm' size='sm'>
         <div className='w-full h-full flex items-center justify-between'>
           <h1 className='text-xl'>Dashboard</h1>
-
+          <NewOrderModal wallet={wallet}>
+            <Button type='button' width='w-fit'>
+              <CreditCard size={20} weight={'fill'} />
+              <span>New Order</span>
+            </Button>
+          </NewOrderModal>
         </div>
       </Box>
 
@@ -163,8 +144,7 @@ export function DashboardPage () {
               <h1 className='text-xl'>Wallet</h1>
             </div>
             <div className='w-full max-h-96 overflow-auto'>
-              <WalletTable balanceStream={balance} />
-
+              <WalletTable walletBalance={wallet} />
             </div>
           </div>
         </div>
