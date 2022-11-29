@@ -1,6 +1,6 @@
 import * as Dialog from '@radix-ui/react-dialog'
 import { FloppyDisk, Star, X } from 'phosphor-react'
-import React, { ReactNode, useState } from 'react'
+import React, { ReactNode, useRef, useState } from 'react'
 import { toast } from 'react-toastify'
 import { Button } from '../../components/Button'
 import { InputText } from '../../components/InputText'
@@ -14,12 +14,14 @@ interface SymbolsModalProps {
 }
 export function SymbolsModal ({ children, symbol, callback }: SymbolsModalProps) {
   const [fields, setFields] = useState<SymbolsInterface>(symbol)
+  const buttonRef = useRef<HTMLButtonElement | null>(null)
 
   async function handleSave (event: React.FormEvent) {
     event.preventDefault()
     try {
       await updateSymbols(fields)
       await callback()
+      if (buttonRef.current?.click) buttonRef.current.click()
       toast.success('Success!')
     } catch (error) {
       toast.error('Update failed!')
@@ -36,7 +38,7 @@ export function SymbolsModal ({ children, symbol, callback }: SymbolsModalProps)
           <Dialog.Content className='relative w-full h-full flex justify-center items-center border-0 outline-none overflow-auto'>
             <section className='relative w-fit h-fit'>
               <Dialog.Close asChild className='absolute right-4 top-4 cursor-pointer hover:opacity-75'>
-                <button className='border-2 border-transparent rounded-md outline-none focus-visible:border-violet-600'> <X size={20} /></button>
+                <button ref={buttonRef} className='border-2 border-transparent rounded-md outline-none focus-visible:border-violet-600'> <X size={20} /></button>
               </Dialog.Close>
 
               <div className='w-full h-full flex flex-col justify-center items-center'>

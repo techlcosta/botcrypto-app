@@ -27,7 +27,7 @@ export function QuantityInput ({ id, name, value, disabled, order, wallet, symbo
     } else {
       const quoteAsset = wallet.find(item => item.symbol === symbol.quote)
       const quoteAmount = parseFloat(quoteAsset?.available ?? '0')
-      qty = Math.floor((quoteAmount / parseFloat(order.price))).toFixed(0)
+      qty = (quoteAmount / parseFloat(order.price)).toFixed(2)
       onChange({ target: { id, value: qty } } as React.ChangeEvent<HTMLInputElement>)
     }
   }

@@ -7,9 +7,10 @@ interface SelectSymbolProps extends React.SelectHTMLAttributes<HTMLSelectElement
   isOnlyFavorites?: boolean
   disabled?: boolean
   selectedValue: string
+  onChange: (event: React.ChangeEvent<HTMLSelectElement>) => void
 }
 
-export const SelectSymbol = ({ isOnlyFavorites = true, disabled, selectedValue, defaultValue, ...props }: SelectSymbolProps) => {
+export const SelectSymbol = ({ isOnlyFavorites = true, disabled, selectedValue, defaultValue, onChange, ...props }: SelectSymbolProps) => {
   const selectRef = useRef<HTMLSelectElement | null>(null)
   const [symbols, setSymbols] = useState<string[]>(['Loading...'])
   const [onlyFavorites, setOnlyFavorites] = useState<boolean>(isOnlyFavorites)
@@ -25,7 +26,6 @@ export const SelectSymbol = ({ isOnlyFavorites = true, disabled, selectedValue, 
           const symbolsName: string[] = onlyFavorites
             ? (response.data.filter((symbol: SymbolsInterface) => symbol.isFavorite)).map((symbol: SymbolsInterface) => symbol.symbol)
             : response.data.map((symbol: SymbolsInterface) => symbol.symbol)
-
           if (symbolsName.length) {
             setSymbols(symbolsName)
           } else {
@@ -37,7 +37,14 @@ export const SelectSymbol = ({ isOnlyFavorites = true, disabled, selectedValue, 
   }, [onlyFavorites])
 
   useEffect(() => {
-    if (selectRef.current?.value !== undefined) selectRef.current.value = selectedValue
+    if (selectRef.current?.value !== undefined) {
+      if (symbols.every(symbol => symbol !== selectedValue)) {
+        selectRef.current.value = symbols[0]
+        onChange({ target: { id: 'symbol', value: 'BTCBUSD' } } as React.ChangeEvent<HTMLSelectElement>)
+      } else {
+        selectRef.current.value = selectedValue
+      }
+    }
   }, [symbols])
 
   const Select = useMemo(() => {
@@ -53,7 +60,15 @@ export const SelectSymbol = ({ isOnlyFavorites = true, disabled, selectedValue, 
           >
             <Star size={24} weight={'fill'} />
           </button>
-          <select ref={selectRef} name="symbol" id="symbol" disabled={disabled ?? false} {...props} className='w-full h-full px-2 bg-slate-800 rounded-r-md outline-none disabled:cursor-not-allowed'>
+          <select
+            ref={selectRef}
+            name="symbol"
+            id="symbol"
+            disabled={disabled ?? false}
+            {...props}
+            className='w-full h-full px-2 bg-slate-800 rounded-r-md outline-none disabled:cursor-not-allowed'
+            onChange={(event) => onChange(event)}
+          >
             {symbols.map((symbol, index) => <option key={index} value={symbol} >{symbol}</option>)}
           </select>
         </div>
