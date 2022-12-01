@@ -2,7 +2,8 @@ import { ReactNode, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AuthContext, LoginProps, User } from '../context/authContext'
 import { usePersistedState } from '../hooks/usePersistState'
-import { authenticate, setDefaultsHeaders } from '../services/api.servives'
+import { setDefaultsHeaders } from '../services/base.api'
+import { authenticate } from '../services/user.api'
 
 interface AuthProviderProps {
   children: ReactNode

@@ -1,7 +1,8 @@
 import * as Dialog from '@radix-ui/react-dialog'
 import { CurrencyCircleDollar, StopCircle, X } from 'phosphor-react'
 import React, { ReactNode, useEffect, useRef, useState } from 'react'
-import { getSymbols } from '../services/api.servives'
+import { getSymbols } from '../services/symbols.api'
+
 import { OrderInterface, SymbolsInterface, WalletProps } from '../shared/types'
 import { Button } from './Button'
 import { ErrorMessage } from './ErrorMSG'

@@ -6,7 +6,8 @@ import { Box } from '../../components/Box'
 import { Button } from '../../components/Button'
 import { SelectQuote } from '../../components/SelectQuote'
 import { usePersistedState } from '../../hooks/usePersistState'
-import { getSymbols, syncSymbols } from '../../services/api.servives'
+import { getSymbols, syncSymbols } from '../../services/symbols.api'
+
 import { SymbolsInterface } from '../../shared/types'
 import { SymbolsTableBody } from './symbolsTableBody'
 

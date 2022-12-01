@@ -1,10 +1,12 @@
 import * as Dialog from '@radix-ui/react-dialog'
+import { AxiosError } from 'axios'
 import { FloppyDisk, Star, X } from 'phosphor-react'
 import React, { ReactNode, useRef, useState } from 'react'
 import { toast } from 'react-toastify'
 import { Button } from '../../components/Button'
 import { InputText } from '../../components/InputText'
-import { updateSymbols } from '../../services/api.servives'
+import { updateSymbols } from '../../services/symbols.api'
+
 import { SymbolsInterface } from '../../shared/types'
 
 interface SymbolsModalProps {
@@ -24,7 +26,13 @@ export function SymbolsModal ({ children, symbol, callback }: SymbolsModalProps)
       if (buttonRef.current?.click) buttonRef.current.click()
       toast.success('Success!')
     } catch (error) {
-      toast.error('Update failed!')
+      let msg: string | undefined
+
+      if (error instanceof Error) msg = error.message
+      if (error instanceof AxiosError) msg = error.response?.data || error.message
+
+      if (buttonRef.current?.click) buttonRef.current.click()
+      toast.error(`Update failed! ${msg ?? 'Error'}`)
     }
   }
 
@@ -68,6 +76,7 @@ export function SymbolsModal ({ children, symbol, callback }: SymbolsModalProps)
                     <span className='block mb-1' >Base Precision:</span>
                     <InputText.Root>
                       <InputText.Input
+                        required
                         type={'number'}
                         defaultValue={fields.basePrecision}
                         onChange={(e) => setFields((state) => { return { ...state, basePrecision: Number(e.target.value) } })}
@@ -78,6 +87,7 @@ export function SymbolsModal ({ children, symbol, callback }: SymbolsModalProps)
                     <span className='block mb-1' >Quote Precision:</span>
                     <InputText.Root>
                       <InputText.Input
+                        required
                         type={'number'}
                         defaultValue={fields.quotePrecision}
                         onChange={(e) => setFields((state) => { return { ...state, quotePrecision: Number(e.target.value) } })}
@@ -89,6 +99,7 @@ export function SymbolsModal ({ children, symbol, callback }: SymbolsModalProps)
                     <span className='block mb-1' >Min Notional:</span>
                     <InputText.Root>
                       <InputText.Input
+                        required
                         type={'number'}
                         defaultValue={fields.minNotional}
                         onChange={(e) => setFields((state) => { return { ...state, minNotional: e.target.value } })}
@@ -99,6 +110,7 @@ export function SymbolsModal ({ children, symbol, callback }: SymbolsModalProps)
                     <span className='block mb-1' >Min Lote Size:</span>
                     <InputText.Root>
                       <InputText.Input
+                        required
                         type={'number'}
                         defaultValue={fields.minLotSize}
                         onChange={(e) => setFields((state) => { return { ...state, minLotSize: e.target.value } })}

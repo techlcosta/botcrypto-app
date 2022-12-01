@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { Box } from '../../components/Box'
 import { Button } from '../../components/Button'
 import { InputText } from '../../components/InputText'
-import { getInfos, updateInfos } from '../../services/api.servives'
+import { getInfos, updateInfos } from '../../services/user.api'
 
 interface FieldsValues {
   id: string

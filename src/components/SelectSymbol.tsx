@@ -1,6 +1,7 @@
 import { Star } from 'phosphor-react'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { getSymbols } from '../services/api.servives'
+import { getSymbols } from '../services/symbols.api'
+
 import { SymbolsInterface } from '../shared/types'
 
 interface SelectSymbolProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
