@@ -15,7 +15,7 @@ export function UniquePrice ({ type, price, onChange }: UniquePriceProps) {
         <InputText.Icon>
           <Coins size={24} weight={'fill'} />
         </InputText.Icon>
-        <InputText.Input disabled={type === 'MARKET'} required type={'number'} name='price' id='price' placeholder='0' value={price} onChange={(event) => onChange(event)} />
+        <InputText.Input disabled={type === 'MARKET'} required type={'number'} name='limitPrice' id='limitPrice' placeholder='0' value={price} onChange={(event) => onChange(event)} />
       </InputText.Root>
     )
   }, [type, price])

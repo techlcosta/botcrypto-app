@@ -1,9 +1,11 @@
 import * as Dialog from '@radix-ui/react-dialog'
 import { CurrencyCircleDollar, StopCircle, X } from 'phosphor-react'
 import React, { ReactNode, useEffect, useRef, useState } from 'react'
+import { toast } from 'react-toastify'
+import { useOnError } from '../hooks/useOnError'
+import { newOrder, NewOrderInterface } from '../services/orders.api'
 import { getSymbols } from '../services/symbols.api'
-
-import { OrderInterface, SymbolsInterface, WalletProps } from '../shared/types'
+import { OrderInterface, STOP_TYPES, SymbolsInterface, WalletProps } from '../shared/types'
 import { Button } from './Button'
 import { ErrorMessage } from './ErrorMSG'
 import { InputText } from './InputText'
@@ -23,7 +25,7 @@ interface NewOrderModalProps {
 export function NewOrderModal ({ children, wallet }: NewOrderModalProps) {
   const INITIAL_ORDER: OrderInterface = {
     symbol: 'BTCBUSD',
-    price: '',
+    limitPrice: '',
     stopPrice: '',
     quantity: '',
     icebergQty: '',
@@ -31,6 +33,7 @@ export function NewOrderModal ({ children, wallet }: NewOrderModalProps) {
     type: 'LIMIT'
   }
 
+  const buttonRef = useRef<HTMLButtonElement | null>(null)
   const totalRef = useRef<HTMLSpanElement | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [order, setOrder] = useState<OrderInterface>(INITIAL_ORDER)
@@ -44,14 +47,38 @@ export function NewOrderModal ({ children, wallet }: NewOrderModalProps) {
     setOrder(INITIAL_ORDER)
   }
 
-  function handleOnSubmit (event: React.FormEvent) {
-    event.preventDefault()
-    console.log(order)
+  async function handleOnSubmit (event: React.FormEvent) {
+    try {
+      event.preventDefault()
+      const newOrderObj = {
+        symbol: order.symbol.toUpperCase(),
+        side: order.side.toUpperCase(),
+        isMaker: false,
+        type: order.type.toUpperCase(),
+        quantity: order.quantity,
+        options: {
+          type: order.type.toUpperCase()
+        }
+      } as NewOrderInterface
+
+      if (order.type !== 'MARKET') newOrderObj.limitPrice = order.limitPrice
+      if (order.type === 'ICEBERG') newOrderObj.options.icebergQuantity = order.icebergQty
+      if (STOP_TYPES.some(type => type === order.type)) {
+        newOrderObj.options.stopPrice = order.stopPrice
+      }
+
+      await newOrder(newOrderObj)
+
+      if (buttonRef.current?.click) buttonRef.current.click()
+
+      toast.success('Success!')
+    } catch (error: any) {
+      const response = useOnError(error)
+      if (response) setError(response)
+    }
   }
 
   function onPriceChange (book: BookInterface): void {
-    setError(null)
-
     if (!totalRef.current?.innerText) return
 
     const quantity = parseFloat(order.quantity)
@@ -61,7 +88,13 @@ export function NewOrderModal ({ children, wallet }: NewOrderModalProps) {
 
       if (order.side === 'SELL') totalRef.current.innerText = (quantity * parseFloat(book.bid)).toFixed(2)
 
-      if (parseFloat(totalRef.current.innerText) < parseFloat(symbol.minNotional)) setError(`ERROR: Min Notional ${symbol.minNotional}`)
+      if (parseFloat(totalRef.current.innerText) < parseFloat(symbol.minLotSize)) {
+        return setError(`ERROR: Min Lot Size  ${symbol.minLotSize}`)
+      }
+
+      if (parseFloat(totalRef.current.innerText) < parseFloat(symbol.minNotional)) {
+        return setError(`ERROR: Min Notional ${symbol.minNotional}`)
+      }
     }
   }
 
@@ -74,7 +107,10 @@ export function NewOrderModal ({ children, wallet }: NewOrderModalProps) {
           if (responseSymbol) setSymbol(responseSymbol)
         }
       })
-      .catch(err => console.log(err))
+      .catch(err => {
+        const response = useOnError(err)
+        if (response) setError(response)
+      })
   }, [order.symbol])
 
   useEffect(() => {
@@ -94,7 +130,7 @@ export function NewOrderModal ({ children, wallet }: NewOrderModalProps) {
       }
     }
 
-    const price = parseFloat(order.price)
+    const price = parseFloat(order.limitPrice)
 
     if (!quantity || !price) {
       if (totalRef.current?.innerText) totalRef.current.innerText = '0'
@@ -109,7 +145,7 @@ export function NewOrderModal ({ children, wallet }: NewOrderModalProps) {
     if (total < parseFloat(symbol.minNotional)) {
       return setError(`ERROR: Min Notional ${symbol.minNotional}`)
     }
-  }, [order.quantity, order.price, order.icebergQty])
+  }, [order.quantity, order.limitPrice, order.icebergQty])
 
   return (
     <Dialog.Root onOpenChange={reset}>
@@ -122,7 +158,7 @@ export function NewOrderModal ({ children, wallet }: NewOrderModalProps) {
             <section className='relative w-fit h-fit'>
 
               <Dialog.Close asChild className='absolute right-4 top-4 cursor-pointer hover:opacity-75'>
-                <i> <X size={20} /></i>
+                <button ref={buttonRef} className='border-2 border-transparent rounded-md outline-none focus-visible:border-violet-600'> <X size={20} /></button>
               </Dialog.Close>
 
               <form className='min-w-[580px] max-w-[660px] bg-slate-900 grid grid-cols-12 gap-x-4 gap-y-6 p-10 rounded-md' onSubmit={handleOnSubmit}>
@@ -152,7 +188,7 @@ export function NewOrderModal ({ children, wallet }: NewOrderModalProps) {
 
                 {order.type !== 'MARKET' &&
                   <div className='col-span-6 w-full'>
-                    <UniquePrice type={order.type} price={order.price} onChange={handleOnChange} />
+                    <UniquePrice type={order.type} price={order.limitPrice} onChange={handleOnChange} />
                   </div>
                 }
 
@@ -187,7 +223,7 @@ export function NewOrderModal ({ children, wallet }: NewOrderModalProps) {
                 </div>
 
                 <div className='col-span-12 w-full mt-4 flex gap-4'>
-                  <Button disabled={!!error || (!(order.type === 'MARKET') && !order.price) || !order.quantity || (order.type === 'ICEBERG' && !order.icebergQty)} width='w-fit' type='submit'>
+                  <Button disabled={!!error || (!(order.type === 'MARKET') && !order.limitPrice) || !order.quantity || (order.type === 'ICEBERG' && !order.icebergQty)} width='w-fit' type='submit'>
                     <span>Send</span>
                   </Button>
                   {error && <ErrorMessage title={error} />}

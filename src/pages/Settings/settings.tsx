@@ -1,8 +1,11 @@
 import { FloppyDisk, Link, LockKeyOpen, Password, User } from 'phosphor-react'
 import React, { useEffect, useState } from 'react'
+import { toast } from 'react-toastify'
 import { Box } from '../../components/Box'
 import { Button } from '../../components/Button'
+import { ErrorMessage } from '../../components/ErrorMSG'
 import { InputText } from '../../components/InputText'
+import { useOnError } from '../../hooks/useOnError'
 import { getInfos, updateInfos } from '../../services/user.api'
 
 interface FieldsValues {
@@ -17,22 +20,34 @@ interface FieldsValues {
 }
 
 export function SettingsPage () {
+  const [error, setError] = useState<string | null>(null)
   const [formValues, setFormValues] = useState<FieldsValues>({} as FieldsValues)
 
   async function handleSubmit (event: React.FormEvent) {
-    event.preventDefault()
+    try {
+      event.preventDefault()
 
-    console.log(formValues)
+      const response = await updateInfos(formValues)
 
-    const response = await updateInfos(formValues)
+      setFormValues({ ...response.data })
 
-    setFormValues({ ...response.data })
+      toast.success('Success!')
+    } catch (error: any) {
+      toast.error('Update failed!')
+
+      const response = useOnError(error)
+
+      if (response) setError(response)
+    }
   }
 
   useEffect(() => {
     getInfos()
       .then(response => { setFormValues({ ...response.data }) })
-      .catch(err => console.error(err))
+      .catch(err => {
+        const response = useOnError(err)
+        if (response) setError(response)
+      })
   }, [])
 
   return (
@@ -145,10 +160,13 @@ export function SettingsPage () {
             </InputText.Root>
           </div>
 
-          <Button type='submit' width='w-fit'>
-            <span> Save</span>
-            <FloppyDisk size={20} weight={'fill'} />
-          </Button>
+          <div className='flex items-center gap-8'>
+            <Button type='submit' width='w-fit'>
+              <span> Save</span>
+              <FloppyDisk size={20} weight={'fill'} />
+            </Button>
+            {error && <ErrorMessage title={error} />}
+          </div>
         </form>
       </Box>
     </main>

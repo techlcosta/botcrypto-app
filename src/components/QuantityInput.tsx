@@ -27,7 +27,7 @@ export function QuantityInput ({ id, name, value, disabled, order, wallet, symbo
     } else {
       const quoteAsset = wallet.find(item => item.symbol === symbol.quote)
       const quoteAmount = parseFloat(quoteAsset?.available ?? '0')
-      qty = (quoteAmount / parseFloat(order.price)).toFixed(2)
+      qty = (quoteAmount / parseFloat(order.limitPrice)).toFixed(2)
       onChange({ target: { id, value: qty } } as React.ChangeEvent<HTMLInputElement>)
     }
   }
@@ -36,7 +36,7 @@ export function QuantityInput ({ id, name, value, disabled, order, wallet, symbo
     return (
       <InputText.Root title={`${name}:`}>
         <InputText.Icon className='p-0 h-full'>
-          <button type='button' className='h-full flex items-center px-4 text-xl  rounded-tl-md rounded-bl-md border-0 bg-violet-700' onClick={handleCalc} >
+          <button type='button' className='h-full flex items-center px-4 text-xl  rounded-tl-md rounded-bl-md border-0 bg-violet-700 outline-none' onClick={handleCalc} >
             <Calculator size={24} weight={'fill'} />
           </button>
         </InputText.Icon>

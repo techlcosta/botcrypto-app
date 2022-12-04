@@ -1,16 +1,18 @@
 import { CreditCard } from 'phosphor-react'
 import { useContext, useEffect, useState } from 'react'
+import { toast } from 'react-toastify'
 import useWebSocket from 'react-use-websocket'
 import { Box } from '../../components/Box'
 import { Button } from '../../components/Button'
 import { NewOrderModal } from '../../components/NewOrderModal'
 import { SelectQuote } from '../../components/SelectQuote'
 import { AuthContext } from '../../context/authContext'
+import { useOnError } from '../../hooks/useOnError'
 import { usePersistedState } from '../../hooks/usePersistState'
 import { getBalance } from '../../services/exchange.api'
 import { getSymbols } from '../../services/symbols.api'
 
-import { BalanceInterface, BookOrderInterface, MarketTickerInterface, SymbolsInterface, WalletProps } from '../../shared/types'
+import { BalanceInterface, BookOrderInterface, ExecutionReportInterface, MarketTickerInterface, SymbolsInterface, WalletProps } from '../../shared/types'
 import { BooksTable } from './bookTicker/booksTable'
 import { CandleChart } from './candleChart/candleChart'
 import { TickersTable } from './marketTicker/tickersTable'
@@ -26,11 +28,13 @@ interface LastJsonMessageInterface {
     bestAsk: string
     bestAskQty: string
   }>
-  balance: BalanceInterface
+  balance: any
+  execution: ExecutionReportInterface
 }
 
 export function DashboardPage () {
   const { token } = useContext(AuthContext)
+  const [execution, setExecution] = useState<ExecutionReportInterface | null >(null)
   const [books, setBooks] = useState<BookOrderInterface>({})
   const [balance, setBalance] = useState<BalanceInterface>({})
   const [tickers, setTickers] = useState<MarketTickerInterface>({})
@@ -42,7 +46,14 @@ export function DashboardPage () {
     onOpen: () => console.log('Connected'),
     onMessage: () => {
       if (lastJsonMessage) {
-        const { market, book, balance } = lastJsonMessage as unknown as LastJsonMessageInterface
+        const { market, book, balance, execution } = lastJsonMessage as unknown as LastJsonMessageInterface
+
+        if (execution && (execution.X === 'FILLED' || execution.X === 'CANCELED')) {
+          setExecution(state => {
+            if (state?.T !== execution.T) return { ...execution }
+            return state
+          })
+        }
 
         if (balance) setBalance(balance)
 
@@ -77,7 +88,10 @@ export function DashboardPage () {
 
       setSymbols(symbols)
     })
-      .catch(err => console.log(err))
+      .catch(err => {
+        const response = useOnError(err)
+        if (response) toast.error(response)
+      })
   }, [defaultQuote])
 
   useEffect(() => {
@@ -94,8 +108,16 @@ export function DashboardPage () {
           setWallet([...balanceWallet])
         }
       })
-      .catch(err => console.log(err))
+      .catch(err => {
+        const response = useOnError(err)
+        if (response) toast.error(response)
+      })
   }, [balance])
+
+  useEffect(() => {
+    if (execution && execution.X === 'FILLED') toast(`Order has been executed on symbol: ${execution.s}`)
+    if (execution && execution.X === 'CANCELED') toast(`Order has been canceled on symbol: ${execution.s}`)
+  }, [execution])
 
   return (
     <main className='px-8 pb-4 w-screen h-full flex flex-col gap-6 overflow-auto'>

@@ -1,18 +1,19 @@
 import { ArrowsClockwise } from 'phosphor-react'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
 import { Box } from '../../components/Box'
 import { Button } from '../../components/Button'
+import { ErrorMessage } from '../../components/ErrorMSG'
 import { SelectQuote } from '../../components/SelectQuote'
+import { useOnError } from '../../hooks/useOnError'
 import { usePersistedState } from '../../hooks/usePersistState'
 import { getSymbols, syncSymbols } from '../../services/symbols.api'
-
 import { SymbolsInterface } from '../../shared/types'
 import { SymbolsTableBody } from './symbolsTableBody'
 
 export function SymbolsPage () {
   const [symbols, setSymbols] = useState<SymbolsInterface[]>([])
+  const [error, setError] = useState<string | null>(null)
   const [isSyncing, setSyncing] = useState<boolean>(false)
   const [defaultQuote, setDefaultQuote] = usePersistedState<string>('BOTCRYPTO_QUOTE_SYMBOLS', 'BNB')
 
@@ -53,7 +54,11 @@ export function SymbolsPage () {
   }
 
   useEffect(() => {
-    handleGetSymbols().catch(err => console.log(err))
+    handleGetSymbols()
+      .catch(err => {
+        const response = useOnError(err)
+        if (response) setError(response)
+      })
   }, [defaultQuote])
 
   return (
@@ -67,12 +72,16 @@ export function SymbolsPage () {
 
       <Box>
         <SymbolsTableBody symbols={symbols} callback={handleGetSymbols} />
-        <Button type='button' width='w-fit' disabled={isSyncing} onClick={handleSync}>
-          <span>{isSyncing ? 'Syncing...' : 'Sync'}</span>
-          <i className={isSyncing ? 'transition-all duration-500 motion-safe:animate-spin' : ''}>
-            <ArrowsClockwise size={20} />
-          </i>
-        </Button>
+        <div className='flex items-center gap-8'>
+          <Button type='button' width='w-fit' disabled={isSyncing} onClick={handleSync}>
+            <span>{isSyncing ? 'Syncing...' : 'Sync'}</span>
+            <i className={isSyncing ? 'transition-all duration-500 motion-safe:animate-spin' : ''}>
+              <ArrowsClockwise size={20} />
+            </i>
+          </Button>
+          {error && <ErrorMessage title={error} />}
+        </div>
+
       </Box>
     </main >
   )

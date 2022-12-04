@@ -42,7 +42,6 @@ export function LoginPage () {
               type='text'
               placeholder='Username'
               onChange={(e) => { formValues.current.username = e.target.value }}
-
             />
           </Root>
 
@@ -59,7 +58,6 @@ export function LoginPage () {
           <div className='mt-4'>
             <Button type='submit' width='w-full'>Submit</Button>
           </div>
-
         </form>
 
       </div>
