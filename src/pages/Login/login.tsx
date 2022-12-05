@@ -1,10 +1,12 @@
 import { Envelope, Eye, Password } from 'phosphor-react'
 import React, { useContext, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import logoSvg from '../../assets/logo.svg'
 import { Button } from '../../components/Button'
 import { InputText } from '../../components/InputText'
 import { AuthContext } from '../../context/authContext'
+import { useOnError } from '../../hooks/useOnError'
 
 export function LoginPage () {
   const navigate = useNavigate()
@@ -22,7 +24,10 @@ export function LoginPage () {
 
     login(formValues.current)
       .then(() => navigate('/'))
-      .catch((err) => console.log(err))
+      .catch(err => {
+        const response = useOnError(err)
+        if (response) toast.error(response)
+      })
   }
 
   return (

@@ -1,5 +1,5 @@
 import { CaretLeft, CaretRight } from 'phosphor-react'
-import { ReactNode } from 'react'
+import { ComponentProps, ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
 import logoSvg from '../assets/logo.svg'
 
@@ -9,9 +9,8 @@ interface SideBarRootProps extends React.HTMLAttributes<HTMLElement> {
   openCloseBtn: () => void
 }
 
-interface SideBarNavButton extends React.LiHTMLAttributes<HTMLLIElement> {
+interface SideBarNavButton extends ComponentProps<typeof NavLink> {
   title: string
-  to: string
   icon?: ReactNode
   isOpen: boolean
 }
@@ -43,13 +42,12 @@ const Root = function ({ children, isOpen, openCloseBtn, ...props }: SideBarRoot
   )
 }
 
-const NavButon = function ({ title, to, icon, isOpen, ...props }: SideBarNavButton) {
+const NavButon = function ({ title, icon, isOpen, ...props }: SideBarNavButton) {
   return (
-    <li className='h-12 mt-2' {...props} >
+    <li className='h-12 mt-2' >
       <NavLink
-        to={to}
-        className='h-full w-full no-underline rounded-md text-stone-500 dark:text-gray-300 font-medium hover:text-gray-50 flex items-center transition-colors duration-300 hover:bg-violet-500 [&.active]:bg-violet-500 border-2 border-transparent outline-none focus-visible:border-violet-600 '
-      >
+      {...props}
+      className='h-full w-full no-underline rounded-md text-stone-500 dark:text-gray-300 font-medium hover:text-gray-50 flex items-center transition-colors duration-300 hover:bg-violet-500 [&.active]:bg-violet-500 border-2 border-transparent outline-none focus-visible:border-violet-600 ' >
         <i className='h-full w-14 min-w-[56px] flex justify-center items-center'>{icon}</i>
         <span className={`h-full flex items-center text-xl transition-all duration-700 ${isOpen ? '' : 'duration-75 hidden'}`}> {title}</span>
       </NavLink>

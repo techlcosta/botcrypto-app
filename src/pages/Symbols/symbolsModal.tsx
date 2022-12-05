@@ -1,10 +1,11 @@
 import * as Dialog from '@radix-ui/react-dialog'
-import { AxiosError } from 'axios'
 import { FloppyDisk, Star, X } from 'phosphor-react'
 import React, { ReactNode, useRef, useState } from 'react'
 import { toast } from 'react-toastify'
 import { Button } from '../../components/Button'
+import { ErrorMessage } from '../../components/ErrorMSG'
 import { InputText } from '../../components/InputText'
+import { useOnError } from '../../hooks/useOnError'
 import { updateSymbols } from '../../services/symbols.api'
 
 import { SymbolsInterface } from '../../shared/types'
@@ -15,24 +16,26 @@ interface SymbolsModalProps {
   callback: () => Promise<void>
 }
 export function SymbolsModal ({ children, symbol, callback }: SymbolsModalProps) {
+  const [error, setError] = useState<string | null>(null)
   const [fields, setFields] = useState<SymbolsInterface>(symbol)
   const buttonRef = useRef<HTMLButtonElement | null>(null)
 
   async function handleSave (event: React.FormEvent) {
     event.preventDefault()
+    setError(null)
     try {
       await updateSymbols(fields)
       await callback()
       if (buttonRef.current?.click) buttonRef.current.click()
       toast.success('Success!')
-    } catch (error) {
-      let msg: string | undefined
+    } catch (error: any) {
+      const response = useOnError(error)
 
-      if (error instanceof Error) msg = error.message
-      if (error instanceof AxiosError) msg = error.response?.data || error.message
+      if (response) setError(response)
 
-      if (buttonRef.current?.click) buttonRef.current.click()
-      toast.error(`Update failed! ${msg ?? 'Error'}`)
+      // if (buttonRef.current?.click) buttonRef.current.click()
+
+      // toast.error(`Update failed! ${response ?? 'Error'}`)
     }
   }
 
@@ -117,11 +120,13 @@ export function SymbolsModal ({ children, symbol, callback }: SymbolsModalProps)
                       />
                     </InputText.Root>
                   </div>
-
-                  <Button type='submit' width='w-fit'>
-                    <span>Save</span>
-                    <FloppyDisk size={20} weight={'fill'} />
-                  </Button>
+                  <div className='col-span-12 flex items-center gap-8'>
+                    <Button type='submit' width='w-fit'>
+                      <span>Save</span>
+                      <FloppyDisk size={20} weight={'fill'} />
+                    </Button>
+                    {error && <ErrorMessage title={error} />}
+                  </div>
                 </form>
               </div>
             </section>

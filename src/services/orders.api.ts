@@ -26,7 +26,7 @@ export interface OrderInterface {
   createdAt: Date
 }
 
-export interface NewOrderInterface {
+export interface NewOrderRequestInterface {
   symbol: string
   quantity: string
   limitPrice?: string
@@ -62,7 +62,7 @@ export async function getOrders ({ symbol, page }: GetOrdersRequestInterface): P
   return response
 }
 
-export async function newOrder (data: NewOrderInterface): Promise<AxiosResponse> {
+export async function newOrder (data: NewOrderRequestInterface): Promise<AxiosResponse> {
   const response = await api.post('/orders/new', data)
 
   return response

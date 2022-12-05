@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { MarketTickerInterface } from '../../../shared/types'
+import { WsMarketTickerInterface } from '../../../shared/types'
 
 interface MarketTickerStateInterface {
   close: string
@@ -12,7 +12,7 @@ interface MarketTickerStateInterface {
 }
 
 interface RowProps {
-  tickers: MarketTickerInterface
+  tickers: WsMarketTickerInterface
   symbol: string
 }
 

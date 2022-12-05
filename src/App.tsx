@@ -6,7 +6,7 @@ export function App () {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppRoutes />
+          <AppRoutes />
       </AuthProvider>
     </BrowserRouter>
   )

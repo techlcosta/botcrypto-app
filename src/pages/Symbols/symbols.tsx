@@ -32,6 +32,8 @@ export function SymbolsPage () {
   }
 
   async function handleSync (): Promise<void> {
+    setError(null)
+
     setSyncing(true)
     try {
       await syncSymbols()
@@ -41,8 +43,12 @@ export function SymbolsPage () {
       toast.success('Success!')
 
       setSyncing(false)
-    } catch (error) {
+    } catch (error: any) {
       toast.error('Update failed!')
+
+      const response = useOnError(error)
+
+      if (response) setError(response)
 
       setSyncing(false)
     }

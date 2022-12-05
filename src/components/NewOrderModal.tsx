@@ -3,9 +3,9 @@ import { CurrencyCircleDollar, StopCircle, X } from 'phosphor-react'
 import React, { ReactNode, useEffect, useRef, useState } from 'react'
 import { toast } from 'react-toastify'
 import { useOnError } from '../hooks/useOnError'
-import { newOrder, NewOrderInterface } from '../services/orders.api'
+import { newOrder, NewOrderRequestInterface } from '../services/orders.api'
 import { getSymbols } from '../services/symbols.api'
-import { OrderInterface, STOP_TYPES, SymbolsInterface, WalletProps } from '../shared/types'
+import { SideOrderType, STOP_TYPES, SymbolsInterface, TypeOrderType, WalletProps } from '../shared/types'
 import { Button } from './Button'
 import { ErrorMessage } from './ErrorMSG'
 import { InputText } from './InputText'
@@ -17,13 +17,23 @@ import { BookInterface, SymbolPrice } from './SymbolPrice'
 import { UniquePrice } from './UniquePrice'
 import { WalletSummary } from './WalletSummary'
 
+export interface NewOrderInterface {
+  symbol: string
+  limitPrice: string
+  stopPrice: string
+  quantity: string
+  icebergQty: string
+  side: SideOrderType
+  type: TypeOrderType
+}
 interface NewOrderModalProps {
   children: ReactNode
   wallet: WalletProps[]
+  callback?: () => Promise<void>
 }
 
-export function NewOrderModal ({ children, wallet }: NewOrderModalProps) {
-  const INITIAL_ORDER: OrderInterface = {
+export function NewOrderModal ({ children, wallet, callback }: NewOrderModalProps) {
+  const INITIAL_ORDER: NewOrderInterface = {
     symbol: 'BTCBUSD',
     limitPrice: '',
     stopPrice: '',
@@ -36,7 +46,7 @@ export function NewOrderModal ({ children, wallet }: NewOrderModalProps) {
   const buttonRef = useRef<HTMLButtonElement | null>(null)
   const totalRef = useRef<HTMLSpanElement | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [order, setOrder] = useState<OrderInterface>(INITIAL_ORDER)
+  const [order, setOrder] = useState<NewOrderInterface>(INITIAL_ORDER)
   const [symbol, setSymbol] = useState<SymbolsInterface>({} as SymbolsInterface)
 
   function handleOnChange (event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) {
@@ -59,7 +69,7 @@ export function NewOrderModal ({ children, wallet }: NewOrderModalProps) {
         options: {
           type: order.type.toUpperCase()
         }
-      } as NewOrderInterface
+      } as NewOrderRequestInterface
 
       if (order.type !== 'MARKET') newOrderObj.limitPrice = order.limitPrice
       if (order.type === 'ICEBERG') newOrderObj.options.icebergQuantity = order.icebergQty
@@ -72,6 +82,8 @@ export function NewOrderModal ({ children, wallet }: NewOrderModalProps) {
       if (buttonRef.current?.click) buttonRef.current.click()
 
       toast.success('Success!')
+
+      if (callback) await callback()
     } catch (error: any) {
       const response = useOnError(error)
       if (response) setError(response)

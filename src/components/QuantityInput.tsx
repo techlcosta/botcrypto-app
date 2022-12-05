@@ -1,14 +1,15 @@
 import { Calculator } from 'phosphor-react'
 import { useMemo } from 'react'
-import { OrderInterface, SymbolsInterface, WalletProps } from '../shared/types'
+import { SymbolsInterface, WalletProps } from '../shared/types'
 import { InputText } from './InputText'
+import { NewOrderInterface } from './NewOrderModal'
 
 interface QuantityInputProps {
   id: string
   name: string
   value: string
   disabled: boolean
-  order: OrderInterface
+  order: NewOrderInterface
   wallet: WalletProps[]
   symbol: SymbolsInterface
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void

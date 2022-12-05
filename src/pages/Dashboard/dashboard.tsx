@@ -11,56 +11,46 @@ import { useOnError } from '../../hooks/useOnError'
 import { usePersistedState } from '../../hooks/usePersistState'
 import { getBalance } from '../../services/exchange.api'
 import { getSymbols } from '../../services/symbols.api'
-
-import { BalanceInterface, BookOrderInterface, ExecutionReportInterface, MarketTickerInterface, SymbolsInterface, WalletProps } from '../../shared/types'
+import { BalanceInterface, BookOrderInterface, OrderInterface, SymbolsInterface, WalletProps, WsBalanceInterface, WsBookOrderInterface, WsMarketTickerInterface } from '../../shared/types'
 import { BooksTable } from './bookTicker/booksTable'
 import { CandleChart } from './candleChart/candleChart'
 import { TickersTable } from './marketTicker/tickersTable'
 import { WalletTable } from './wallet/walletTable'
 
 interface LastJsonMessageInterface {
-  market: MarketTickerInterface
-  book: Array<{
-    updateId: number
-    symbol: string
-    bestBid: string
-    bestBidQty: string
-    bestAsk: string
-    bestAskQty: string
-  }>
-  balance: any
-  execution: ExecutionReportInterface
+  miniTickerStream: WsMarketTickerInterface
+  bookTickersStream: WsBookOrderInterface[]
+  balanceStream: WsBalanceInterface
+  executionStream: OrderInterface
 }
 
 export function DashboardPage () {
-  const { token } = useContext(AuthContext)
-  const [execution, setExecution] = useState<ExecutionReportInterface | null >(null)
-  const [books, setBooks] = useState<BookOrderInterface>({})
-  const [balance, setBalance] = useState<BalanceInterface>({})
-  const [tickers, setTickers] = useState<MarketTickerInterface>({})
   const [symbols, setSymbols] = useState<SymbolsInterface[]>([])
-  const [wallet, setWallet] = useState<WalletProps[]>([])
   const [defaultQuote, setDefaultQuote] = usePersistedState<string>('BOTCRYPTO_QUOTE_DASHBOARD', 'FAVORITES')
+  const { token } = useContext(AuthContext)
+
+  const [books, setBooks] = useState<BookOrderInterface>({})
+  const [balance, setBalance] = useState<WsBalanceInterface>({} as WsBalanceInterface)
+  const [tickers, setTickers] = useState<WsMarketTickerInterface>({})
+  const [wallet, setWallet] = useState<WalletProps[]>([])
+
+  function handleSelect (event: React.ChangeEvent<HTMLSelectElement>) {
+    const value = event.target.value
+    setDefaultQuote(value)
+  }
 
   const { lastJsonMessage } = useWebSocket(import.meta.env.VITE_APP_WS_URL, {
     onOpen: () => console.log('Connected'),
     onMessage: () => {
       if (lastJsonMessage) {
-        const { market, book, balance, execution } = lastJsonMessage as unknown as LastJsonMessageInterface
+        const { miniTickerStream, bookTickersStream, balanceStream } = lastJsonMessage as unknown as LastJsonMessageInterface
 
-        if (execution && (execution.X === 'FILLED' || execution.X === 'CANCELED')) {
-          setExecution(state => {
-            if (state?.T !== execution.T) return { ...execution }
-            return state
-          })
-        }
+        if (balanceStream) setBalance(balanceStream)
 
-        if (balance) setBalance(balance)
+        if (miniTickerStream) setTickers(miniTickerStream)
 
-        if (market) setTickers(market)
-
-        if (book) {
-          book.forEach(item => { books[item.symbol] = item })
+        if (bookTickersStream) {
+          bookTickersStream.forEach(item => { books[item.symbol] = item })
           setBooks(books)
         }
       }
@@ -70,29 +60,6 @@ export function DashboardPage () {
     reconnectInterval: 3000,
     protocols: token ?? ''
   })
-
-  function handleSelect (event: React.ChangeEvent<HTMLSelectElement>) {
-    const value = event.target.value
-    setDefaultQuote(value)
-  }
-
-  useEffect(() => {
-    getSymbols().then(response => {
-      const symbols = response.data.filter((symbol: SymbolsInterface) => {
-        if (defaultQuote === 'FAVORITES') {
-          return symbol.isFavorite
-        } else {
-          return symbol.symbol.endsWith(defaultQuote)
-        }
-      })
-
-      setSymbols(symbols)
-    })
-      .catch(err => {
-        const response = useOnError(err)
-        if (response) toast.error(response)
-      })
-  }, [defaultQuote])
 
   useEffect(() => {
     getBalance()
@@ -115,9 +82,22 @@ export function DashboardPage () {
   }, [balance])
 
   useEffect(() => {
-    if (execution && execution.X === 'FILLED') toast(`Order has been executed on symbol: ${execution.s}`)
-    if (execution && execution.X === 'CANCELED') toast(`Order has been canceled on symbol: ${execution.s}`)
-  }, [execution])
+    getSymbols().then(response => {
+      const symbols = response.data.filter((symbol: SymbolsInterface) => {
+        if (defaultQuote === 'FAVORITES') {
+          return symbol.isFavorite
+        } else {
+          return symbol.symbol.endsWith(defaultQuote)
+        }
+      })
+
+      setSymbols(symbols)
+    })
+      .catch(err => {
+        const response = useOnError(err)
+        if (response) toast.error(response)
+      })
+  }, [defaultQuote])
 
   return (
     <main className='px-8 pb-4 w-screen h-full flex flex-col gap-6 overflow-auto'>
