@@ -1,6 +1,5 @@
 import { CreditCard } from 'phosphor-react'
 import { useContext, useEffect, useState } from 'react'
-import { toast } from 'react-toastify'
 import useWebSocket from 'react-use-websocket'
 import { Box } from '../../components/Box'
 import { Button } from '../../components/Button'
@@ -74,16 +73,12 @@ export function DashboardPage () {
           })
           setWallet([...balanceWallet])
         }
-      })
-      .catch(err => {
-        const response = useOnError(err)
-        if (response) toast.error(response)
-      })
+      }).catch(err => useOnError(err))
   }, [balance])
 
   useEffect(() => {
     getSymbols().then(response => {
-      const symbols = response.data.filter((symbol: SymbolsInterface) => {
+      const symbols = response.symbols.filter((symbol: SymbolsInterface) => {
         if (defaultQuote === 'FAVORITES') {
           return symbol.isFavorite
         } else {
@@ -92,11 +87,7 @@ export function DashboardPage () {
       })
 
       setSymbols(symbols)
-    })
-      .catch(err => {
-        const response = useOnError(err)
-        if (response) toast.error(response)
-      })
+    }).catch(err => useOnError(err))
   }, [defaultQuote])
 
   return (

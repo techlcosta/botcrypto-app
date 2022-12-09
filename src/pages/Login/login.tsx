@@ -1,7 +1,6 @@
 import { Envelope, Eye, Password } from 'phosphor-react'
 import React, { useContext, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify'
 import logoSvg from '../../assets/logo.svg'
 import { Button } from '../../components/Button'
 import { InputText } from '../../components/InputText'
@@ -24,23 +23,19 @@ export function LoginPage () {
 
     login(formValues.current)
       .then(() => navigate('/'))
-      .catch(err => {
-        const response = useOnError(err)
-        if (response) toast.error(response)
-      })
+      .catch(err => useOnError(err))
   }
 
   return (
     <main className='bg-slate-900 h-screen flex justify-center items-center'>
       <div className='w-full max-w-2xl bg-slate-800 flex justify-around gap-4 items-center p-8 rounded-lg'>
 
-        <div className=''>
+        <div className='hidden sm:block'>
           <img src={logoSvg} alt="bot crypto logo" className='h-80' />
         </div>
 
         <form className='w-full h-full flex flex-col gap-4' onSubmit={handleSubmit}>
           <h1 className='text-4xl text-gray-300 font-russo mb-8 text-center'>BOTCRYPTO</h1>
-
           <Root >
             <Icon><Envelope weight='fill' /></Icon>
             <Input

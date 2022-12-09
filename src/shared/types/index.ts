@@ -77,7 +77,7 @@ export type StopTypes = 'STOP_LOSS' | 'STOP_LOSS_LIMIT' | 'TAKE_PROFIT' | 'TAKE_
 
 export const STOP_TYPES: StopTypes[] = ['STOP_LOSS', 'STOP_LOSS_LIMIT', 'TAKE_PROFIT', 'TAKE_PROFIT_LIMIT']
 
-type OrderStatusType = 'NEW' | 'FILLED' | 'CANCELED' | 'REJECTED'
+type OrderStatusType = 'NEW' | 'FILLED' | 'CANCELED' | 'REJECTED' | 'PARTIALLY_FILLED'
 
 export interface OrderInterface {
   id: string

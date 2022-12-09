@@ -4,37 +4,39 @@ import { toast } from 'react-toastify'
 import { Box } from '../../components/Box'
 import { Button } from '../../components/Button'
 import { ErrorMessage } from '../../components/ErrorMSG'
+import { Pagination } from '../../components/Pagination'
 import { SelectQuote } from '../../components/SelectQuote'
+import { useGetQuery } from '../../hooks/useGetQuery'
 import { useOnError } from '../../hooks/useOnError'
 import { usePersistedState } from '../../hooks/usePersistState'
 import { getSymbols, syncSymbols } from '../../services/symbols.api'
 import { SymbolsInterface } from '../../shared/types'
 import { SymbolsTableBody } from './symbolsTableBody'
 
+type QuotesType = 'FAVORITES' | 'USD' | 'EUR' | 'BNB' | 'ETH' | 'BTC' | 'USDT'
+
 export function SymbolsPage () {
+  const query = useGetQuery('page')
   const [symbols, setSymbols] = useState<SymbolsInterface[]>([])
   const [error, setError] = useState<string | null>(null)
+  const [page, setPage] = useState<number>(query)
+  const [pagesQTY, setPagesQTY] = useState<number>(1)
   const [isSyncing, setSyncing] = useState<boolean>(false)
-  const [defaultQuote, setDefaultQuote] = usePersistedState<string>('BOTCRYPTO_QUOTE_SYMBOLS', 'BNB')
+  const [defaultQuote, setDefaultQuote] = usePersistedState<QuotesType>('BOTCRYPTO_QUOTE_SYMBOLS', 'FAVORITES')
 
   async function handleGetSymbols (): Promise<void> {
-    const response = await getSymbols()
+    const symbol = defaultQuote !== 'FAVORITES' ? defaultQuote : undefined
+    const onlyFavorites = defaultQuote === 'FAVORITES' ? true : undefined
+    const response = await getSymbols({ page, symbol, onlyFavorites })
 
-    const symbols = response.data.filter((symbol: SymbolsInterface) => {
-      if (defaultQuote === 'FAVORITES') {
-        return symbol.isFavorite
-      } else {
-        return symbol.symbol.endsWith(defaultQuote)
-      }
-    })
-
-    setSymbols(symbols)
+    setPagesQTY(response.pages)
+    setSymbols(response.symbols)
   }
 
   async function handleSync (): Promise<void> {
     setError(null)
-
     setSyncing(true)
+
     try {
       await syncSymbols()
 
@@ -44,33 +46,30 @@ export function SymbolsPage () {
 
       setSyncing(false)
     } catch (error: any) {
-      toast.error('Update failed!')
-
-      const response = useOnError(error)
-
-      if (response) setError(response)
+      useOnError(error)
 
       setSyncing(false)
+
+      if (error instanceof Error) setError(error.message)
     }
   }
 
   function handleSelect (event: React.ChangeEvent<HTMLSelectElement>) {
-    const value = event.target.value
+    const value = event.target.value as QuotesType
+
     setDefaultQuote(value)
   }
 
   useEffect(() => {
-    handleGetSymbols()
-      .catch(err => {
-        const response = useOnError(err)
-        if (response) setError(response)
-      })
-  }, [defaultQuote])
+    handleGetSymbols().catch(err => useOnError(err))
+  }, [defaultQuote, page])
+
+  useEffect(() => { setPage(query) }, [query])
 
   return (
     <main className='px-8 pb-4 w-full h-full flex flex-col gap-8 overflow-auto'>
       <Box mt='md' size='sm'>
-        <div className='w-full h-full relative flex items-center min-w-[820px] justify-between'>
+        <div className='w-full h-full relative flex items-center min-w-full justify-between'>
           <h1 className='text-xl'>Symbols</h1>
           <SelectQuote defaultQuote={defaultQuote} onChange={(e) => handleSelect(e)} />
         </div>
@@ -87,7 +86,7 @@ export function SymbolsPage () {
           </Button>
           {error && <ErrorMessage title={error} />}
         </div>
-
+        <Pagination pagesQTY={pagesQTY} path={'symbols'} query={query} />
       </Box>
     </main >
   )

@@ -85,8 +85,7 @@ export function NewOrderModal ({ children, wallet, callback }: NewOrderModalProp
 
       if (callback) await callback()
     } catch (error: any) {
-      const response = useOnError(error)
-      if (response) setError(response)
+      useOnError(error)
     }
   }
 
@@ -113,15 +112,15 @@ export function NewOrderModal ({ children, wallet, callback }: NewOrderModalProp
   useEffect(() => {
     getSymbols()
       .then(response => {
-        if (response.data) {
-          const responseSymbol = (response.data as SymbolsInterface[]).find(item => item.symbol === order.symbol)
+        if (response) {
+          const responseSymbol = (response.symbols).find(item => item.symbol === order.symbol)
 
           if (responseSymbol) setSymbol(responseSymbol)
         }
       })
-      .catch(err => {
-        const response = useOnError(err)
-        if (response) setError(response)
+      .catch((err: any) => {
+        useOnError(err)
+        setError(err.message)
       })
   }, [order.symbol])
 
@@ -173,10 +172,9 @@ export function NewOrderModal ({ children, wallet, callback }: NewOrderModalProp
                 <button ref={buttonRef} className='border-2 border-transparent rounded-md outline-none focus-visible:border-violet-600'> <X size={20} /></button>
               </Dialog.Close>
 
-              <form className='min-w-[580px] max-w-[660px] bg-slate-900 grid grid-cols-12 gap-x-4 gap-y-6 p-10 rounded-md' onSubmit={handleOnSubmit}>
-                <header className='col-span-12 w-full'>
-                  <h1 className='text-xl'>New Order</h1>
-                </header>
+              <form className='min-w-[580px] max-w-[660px] bg-slate-900 grid grid-cols-12 gap-x-4 gap-y-6 p-10 rounded-md uppercase' onSubmit={handleOnSubmit}>
+
+                  <h1 className='col-span-12 text-xl font-russo'>New Order</h1>
 
                 <div className='col-span-6 w-full'>
                   <SelectSymbol onChange={handleOnChange} selectedValue={order.symbol} />

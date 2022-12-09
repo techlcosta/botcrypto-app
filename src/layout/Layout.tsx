@@ -4,13 +4,12 @@ import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { SideBar } from '../components/SideBar'
 import { usePersistedState } from '../hooks/usePersistState'
-import { WsProvider } from '../providers/wsProvider'
+import { WsExectionsOrdersProvider } from '../providers/wsExectionsOrdersProvider'
 
 export function Layout () {
   const [isOpen, setOpen] = usePersistedState('BOTCRYPTO_TOOGLE_MENU', false)
   return (
-    <WsProvider>
-
+    <WsExectionsOrdersProvider>
       <div className='relative h-screen w-screen flex overflow-hidden'>
         <ToastContainer
           position="top-right"
@@ -33,6 +32,6 @@ export function Layout () {
         </SideBar.Root>
         <Outlet />
       </div>
-    </WsProvider>
+    </WsExectionsOrdersProvider>
   )
 }

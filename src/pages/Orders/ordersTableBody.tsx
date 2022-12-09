@@ -1,10 +1,9 @@
 
-import { OrderInterface } from '../../services/orders.api'
+import { OrderInterface } from '../../shared/types'
 import { SymbolsTableRow } from './ordersTableRow'
 
 interface TableProps {
   orders: OrderInterface[]
-
 }
 
 export function OrdersTableBody ({ orders }: TableProps) {

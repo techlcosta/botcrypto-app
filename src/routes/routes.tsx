@@ -15,6 +15,7 @@ export function AppRoutes () {
         <Route path='/symbols' element={<SymbolsPage />} />
         <Route path='/settings' element={<SettingsPage />} />
         <Route path='/orders' element={<Orders />} />
+        <Route path='/orders/:symbol' element={<Orders />} />
       </Route>
       <Route path="/login" element={<LoginPage />} />
     </Routes>

@@ -23,10 +23,10 @@ export const SelectSymbol = ({ isOnlyFavorites = true, disabled, selectedValue, 
   useEffect(() => {
     getSymbols()
       .then(response => {
-        if (response.data) {
+        if (response) {
           const symbolsName: string[] = onlyFavorites
-            ? (response.data.filter((symbol: SymbolsInterface) => symbol.isFavorite)).map((symbol: SymbolsInterface) => symbol.symbol)
-            : response.data.map((symbol: SymbolsInterface) => symbol.symbol)
+            ? (response.symbols.filter((symbol: SymbolsInterface) => symbol.isFavorite)).map((symbol: SymbolsInterface) => symbol.symbol)
+            : response.symbols.map((symbol: SymbolsInterface) => symbol.symbol)
           if (symbolsName.length) {
             setSymbols(symbolsName)
           } else {
@@ -38,10 +38,10 @@ export const SelectSymbol = ({ isOnlyFavorites = true, disabled, selectedValue, 
   }, [onlyFavorites])
 
   useEffect(() => {
-    if (selectRef.current?.value !== undefined) {
+    if (selectRef.current?.value !== undefined && symbols[0] !== 'Loading...') {
       if (symbols.every(symbol => symbol !== selectedValue)) {
         selectRef.current.value = symbols[0]
-        onChange({ target: { id: 'symbol', value: 'BTCBUSD' } } as React.ChangeEvent<HTMLSelectElement>)
+        onChange({ target: { id: 'symbol', value: symbols[0] } } as React.ChangeEvent<HTMLSelectElement>)
       } else {
         selectRef.current.value = selectedValue
       }

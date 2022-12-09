@@ -54,8 +54,8 @@ export function SymbolPrice ({ symbol, onChange }: SymbolPriceProps) {
     <label className='w-full flex flex-col justify-center items-center gap-1'>
       <div className='w-full text-left'>Market Price</div>
       <div className='w-full h-12 flex flex-col justify-center items-center gap-1 bg-slate-800 border-solid border-2 border-gray-700 rounded-md text-sm text-center '>
-        <div className='w-full  bg-green-300 text-green-800 rounded-tl-md rounded-tr-md'>ASK: {book.ask ? book.ask.substring(0, 8) : ''}</div>
-        <div className='w-full  bg-red-300 text-red-800 rounded-bl-md rounded-br-md'>BID: {book.bid ? book.bid.substring(0, 8) : ''}</div>
+        <div className='w-full  bg-red-300 text-red-800 rounded-tl-md rounded-tr-md'>ASK: {book.ask ? book.ask.substring(0, 8) : ''}</div>
+        <div className='w-full  bg-green-300 text-green-800 rounded-bl-md rounded-br-md'>BID: {book.bid ? book.bid.substring(0, 8) : ''}</div>
       </div>
     </label>
   )

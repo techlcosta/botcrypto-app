@@ -17,7 +17,7 @@ const Root = function ({ children, title, ...props }: InputRootProps) {
       className='w-full flex flex-col justify-center gap-1'
       {...props}
     >
-      <span>{title}</span>
+      {title && <span>{title}</span>}
       <div className='h-12 w-full flex items-center bg-gray-900 text-gray-400 border-solid border-2 border-gray-700 transition-colors duration-500 focus-within:border-violet-500 rounded-md [&:has(input:focus)]:text-violet-400 '>
         {children}
       </div>

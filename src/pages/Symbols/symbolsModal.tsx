@@ -23,19 +23,19 @@ export function SymbolsModal ({ children, symbol, callback }: SymbolsModalProps)
   async function handleSave (event: React.FormEvent) {
     event.preventDefault()
     setError(null)
+
     try {
       await updateSymbols(fields)
+
       await callback()
+
       if (buttonRef.current?.click) buttonRef.current.click()
+
       toast.success('Success!')
     } catch (error: any) {
-      const response = useOnError(error)
+      useOnError(error)
 
-      if (response) setError(response)
-
-      // if (buttonRef.current?.click) buttonRef.current.click()
-
-      // toast.error(`Update failed! ${response ?? 'Error'}`)
+      if (error instanceof Error)setError(error.message)
     }
   }
 
@@ -54,10 +54,9 @@ export function SymbolsModal ({ children, symbol, callback }: SymbolsModalProps)
 
               <div className='w-full h-full flex flex-col justify-center items-center'>
 
-                <form className='min-w-[580px] max-w-[660px] grid grid-cols-12 gap-x-4 gap-y-6 p-4 bg-slate-900 rounded-md opacity-100 uppercase text-sm' onSubmit={handleSave}>
-                  <header className='col-span-12 mt-4 text-center' >
-                    <h1 className='font-russo text-lg' >Edit Symbol</h1>
-                  </header>
+                <form className='min-w-[580px] max-w-[660px] grid grid-cols-12 gap-x-4 gap-y-6 p-4 bg-slate-900 rounded-md opacity-100 uppercase' onSubmit={handleSave}>
+
+                    <h1 className='col-span-12 font-russo text-lg' >Edit Symbol</h1>
 
                   <div className='col-span-12 grid grid-cols-12 gap-4'>
                     <div className='col-span-6'>
@@ -86,7 +85,7 @@ export function SymbolsModal ({ children, symbol, callback }: SymbolsModalProps)
                       />
                     </InputText.Root>
                   </div>
-                  <div className='w col-span-6'>
+                  <div className='col-span-6'>
                     <span className='block mb-1' >Quote Precision:</span>
                     <InputText.Root>
                       <InputText.Input

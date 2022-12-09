@@ -1,30 +1,6 @@
 import { AxiosResponse } from 'axios'
-import { SideOrderType, TypeOrderType } from '../shared/types'
+import { OrderInterface, SideOrderType, TypeOrderType } from '../shared/types'
 import { api } from './base.api'
-
-export interface OrderInterface {
-  id: string
-  automationId?: string
-  symbol: string
-  orderId: string
-  clientOrderId: string
-  transactionTime: string
-  type: string
-  side: string
-  quantity: string
-  status: string
-  icebergQuantity?: string
-  obs?: string
-  limitPrice?: string
-  stopPrice?: string
-  avgPrice?: string
-  comission?: string
-  net?: string
-  isMaker: boolean
-  userId: string
-  updatedAt: Date
-  createdAt: Date
-}
 
 export interface NewOrderRequestInterface {
   symbol: string
@@ -53,11 +29,11 @@ export interface GetOrdersResponseInterface {
 
 interface CancelOrderInterface {
   symbol: string
-  orderId: string
+  orderId: number
 }
 
 export async function getOrders ({ symbol, page }: GetOrdersRequestInterface): Promise<AxiosResponse> {
-  const response = await api.get(`/orders/get${symbol ?? ''}?page=${page ?? 1}`)
+  const response = await api.get(`/orders/${symbol ?? ''}?page=${page ?? 1}`)
 
   return response
 }

@@ -1,9 +1,9 @@
-import { MarketTickerInterface, SymbolsInterface } from '../../../shared/types'
+import { SymbolsInterface, WsMarketTickerInterface } from '../../../shared/types'
 import { TickersRow } from './tickersRow'
 
 interface TableProps {
   symbols: SymbolsInterface[]
-  tickers: MarketTickerInterface
+  tickers: WsMarketTickerInterface
 }
 
 export function TickersTable ({ symbols, tickers }: TableProps) {

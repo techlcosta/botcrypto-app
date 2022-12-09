@@ -33,21 +33,16 @@ export function SettingsPage () {
 
       toast.success('Success!')
     } catch (error: any) {
-      toast.error('Update failed!')
+      useOnError(error)
 
-      const response = useOnError(error)
-
-      if (response) setError(response)
+      setError(error.message)
     }
   }
 
   useEffect(() => {
     getInfos()
       .then(response => { setFormValues({ ...response.data }) })
-      .catch(err => {
-        const response = useOnError(err)
-        if (response) setError(response)
-      })
+      .catch(err => useOnError(err))
   }, [])
 
   return (

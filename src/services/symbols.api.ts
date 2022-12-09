@@ -1,4 +1,5 @@
 import { AxiosResponse } from 'axios'
+import { SymbolsInterface } from '../shared/types'
 import { api } from './base.api'
 
 interface UpdateSymbolsInterface {
@@ -10,10 +11,24 @@ interface UpdateSymbolsInterface {
   isFavorite?: boolean
 }
 
-export async function getSymbols (): Promise<AxiosResponse> {
-  const response = await api.get('/symbols')
+interface RequestGetSymbolsInterface {
+  page?: number
+  symbol?: string
+  onlyFavorites?: boolean
+}
 
-  return response
+interface ResponseGetSymbolsInterface {
+  symbols: SymbolsInterface[]
+  pages: number
+}
+
+export async function getSymbols (data?: RequestGetSymbolsInterface): Promise<ResponseGetSymbolsInterface> {
+  const response = await api.get(`/symbols/${data?.symbol ?? ''}`, { params: data })
+
+  const symbols = response.data.symbols
+  const pages = response.data.pages
+
+  return { symbols, pages }
 }
 
 export async function updateSymbols (data: UpdateSymbolsInterface): Promise<AxiosResponse> {

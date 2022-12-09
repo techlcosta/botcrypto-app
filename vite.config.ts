@@ -8,11 +8,13 @@ export default defineConfig({
     react(),
     VitePWA({
       manifest: {
-        name: 'vite-react-ts-100',
-        short_name: 'vite-react-ts-100',
+        display_override: [ "window-controls-overlay" ],
+        name: 'BotCrypto',
+        short_name: '',
         start_url: '/',
         display: 'standalone',
-        background_color: '#ffffff',
+        background_color: '#1e293b',
+        theme_color: '#1e293b',
         lang: 'en',
         scope: '/',
         icons: [
@@ -29,7 +31,6 @@ export default defineConfig({
             purpose: 'any maskable',
           },
         ],
-        theme_color: '#ffffff',
       },
     }),
   ],

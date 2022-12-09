@@ -2,10 +2,10 @@ import { ReactNode, useContext, useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 import useWebSocket from 'react-use-websocket'
 import { AuthContext } from '../context/authContext'
-import { WsContext } from '../context/wsContext'
+import { WsExectionsOrdersContext } from '../context/wsExectionsOrdersContext'
 import { OrderInterface, WsBalanceInterface, WsBookOrderInterface, WsMarketTickerInterface } from '../shared/types'
 
-interface WsProviderProps {
+interface WsExectionsOrdersProviderProps {
   children: ReactNode
 }
 
@@ -14,9 +14,10 @@ interface LastJsonMessageInterface {
   bookTickersStream: WsBookOrderInterface[]
   balanceStream: WsBalanceInterface
   executionStream: OrderInterface
+  error: any
 }
 
-export function WsProvider ({ children }: WsProviderProps) {
+export function WsExectionsOrdersProvider ({ children }: WsExectionsOrdersProviderProps) {
   const { token } = useContext(AuthContext)
   const [execution, setExecution] = useState<OrderInterface | null>(null)
 
@@ -24,7 +25,11 @@ export function WsProvider ({ children }: WsProviderProps) {
     onOpen: () => console.log('Connected on executionStream '),
     onMessage: () => {
       if (lastJsonMessage) {
-        const { executionStream } = lastJsonMessage as unknown as LastJsonMessageInterface
+        const { executionStream, error } = lastJsonMessage as unknown as LastJsonMessageInterface
+
+        if (!executionStream && !error) return
+
+        if (error) return toast.error('Update order failed!')
 
         if (executionStream && (executionStream.status === 'FILLED' || executionStream.status === 'CANCELED')) {
           setExecution(state => {
@@ -45,10 +50,8 @@ export function WsProvider ({ children }: WsProviderProps) {
   }, [execution])
 
   return (
-    <WsContext.Provider value={{}}>
-
+    <WsExectionsOrdersContext.Provider value={{ executionOrders: execution }}>
       {children}
-
-    </WsContext.Provider>
+    </WsExectionsOrdersContext.Provider>
   )
 }
