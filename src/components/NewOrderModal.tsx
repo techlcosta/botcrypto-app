@@ -177,7 +177,7 @@ export function NewOrderModal ({ children, wallet, callback }: NewOrderModalProp
                   <h1 className='col-span-12 text-xl font-russo'>New Order</h1>
 
                 <div className='col-span-6 w-full'>
-                  <SelectSymbol onChange={handleOnChange} selectedValue={order.symbol} />
+                  <SelectSymbol onChange={handleOnChange} selectedValue={order.symbol} showLabel={true} />
                 </div>
 
                 <div className='col-span-6 w-full'>

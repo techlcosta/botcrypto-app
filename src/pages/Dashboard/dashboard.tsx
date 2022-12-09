@@ -5,6 +5,7 @@ import { Box } from '../../components/Box'
 import { Button } from '../../components/Button'
 import { NewOrderModal } from '../../components/NewOrderModal'
 import { SelectQuote } from '../../components/SelectQuote'
+import { SelectSymbol } from '../../components/SelectSymbol'
 import { AuthContext } from '../../context/authContext'
 import { useOnError } from '../../hooks/useOnError'
 import { usePersistedState } from '../../hooks/usePersistState'
@@ -32,10 +33,15 @@ export function DashboardPage () {
   const [balance, setBalance] = useState<WsBalanceInterface>({} as WsBalanceInterface)
   const [tickers, setTickers] = useState<WsMarketTickerInterface>({})
   const [wallet, setWallet] = useState<WalletProps[]>([])
+  const [chartSymbol, setChartSymbol] = useState<string>('BTCBUSD')
 
   function handleSelect (event: React.ChangeEvent<HTMLSelectElement>) {
     const value = event.target.value
     setDefaultQuote(value)
+  }
+
+  function handleOnChange (event: React.ChangeEvent<HTMLSelectElement>) {
+    setChartSymbol(event.target.value)
   }
 
   const { lastJsonMessage } = useWebSocket(import.meta.env.VITE_APP_WS_URL, {
@@ -95,17 +101,24 @@ export function DashboardPage () {
       <Box mt='sm' size='sm'>
         <div className='w-full h-full flex items-center justify-between'>
           <h1 className='text-xl'>Dashboard</h1>
-          <NewOrderModal wallet={wallet}>
-            <Button type='button' width='w-fit'>
-              <CreditCard size={20} weight={'fill'} />
-              <span>New Order</span>
-            </Button>
-          </NewOrderModal>
+          <div className='flex gap-4'>
+            <NewOrderModal wallet={wallet}>
+              <Button type='button' width='w-fit'>
+                <CreditCard size={20} weight={'fill'} />
+                <span>New Order</span>
+              </Button>
+            </NewOrderModal>
+            <div className='w-60'>
+              <SelectSymbol onChange={handleOnChange} selectedValue={chartSymbol} showLabel={false} />
+            </div>
+          </div>
         </div>
       </Box>
 
       <Box size='md'>
-        <CandleChart />
+
+        <CandleChart symbol={chartSymbol} />
+
       </Box>
 
       <Box size='md'>

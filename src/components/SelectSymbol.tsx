@@ -8,10 +8,11 @@ interface SelectSymbolProps extends React.SelectHTMLAttributes<HTMLSelectElement
   isOnlyFavorites?: boolean
   disabled?: boolean
   selectedValue: string
+  showLabel: boolean
   onChange: (event: React.ChangeEvent<HTMLSelectElement>) => void
 }
 
-export const SelectSymbol = ({ isOnlyFavorites = true, disabled, selectedValue, defaultValue, onChange, ...props }: SelectSymbolProps) => {
+export const SelectSymbol = ({ isOnlyFavorites = true, disabled, showLabel, selectedValue, defaultValue, onChange, ...props }: SelectSymbolProps) => {
   const selectRef = useRef<HTMLSelectElement | null>(null)
   const [symbols, setSymbols] = useState<string[]>(['Loading...'])
   const [onlyFavorites, setOnlyFavorites] = useState<boolean>(isOnlyFavorites)
@@ -51,7 +52,7 @@ export const SelectSymbol = ({ isOnlyFavorites = true, disabled, selectedValue, 
   const Select = useMemo(() => {
     return (
       <label className='w-full flex flex-col justify-center items-center gap-1'>
-        <div className='w-full text-left'>Symbols</div>
+        {showLabel && <div className='w-full text-left'>Symbols</div>}
         <div className='w-full h-12 flex justify-center items-center border-solid border-2 border-gray-700 rounded-md focus-within:border-violet-500'>
           <button
             disabled={disabled ?? false}
